@@ -3,7 +3,7 @@
 {% block title %}Survey Questions{% endblock %}
 
 {% block content %}
-<form action="/answer/{{idx}}">
+<form action="/answer/{{idx}}" method="POST">
     {% for msg in get_flashed_messages() %}
         <p>{{ msg }}</p>
     {% endfor %}

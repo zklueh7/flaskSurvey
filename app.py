@@ -29,10 +29,10 @@ def questions(idx):
 
     
 
-@app.route("/answer/<idx>")
+@app.route("/answer/<idx>", methods=["POST"])
 def answer(idx):
     """Append the user's answer to the responses list and redirect to the next question"""
-    responses.append(request.args[idx])
+    responses.append(request.form[idx])
     if len(responses) < len(survey.questions):
         return redirect(f"/questions/{int(idx)+1}")
     return redirect("/thanks")
