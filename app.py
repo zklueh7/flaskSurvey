@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, flash
+from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import satisfaction_survey
 
@@ -7,7 +7,6 @@ app.config['SECRET_KEY'] = "oh-so-secret"
 
 debug = DebugToolbarExtension(app)
 
-responses = []
 survey = satisfaction_survey
 
 @app.route('/')
@@ -15,12 +14,18 @@ def home():
     """Show survey title, instructions, and start button"""
     return render_template("home.html", survey=survey)
 
+@app.route('/start', methods=["POST"])
+def start():
+    """Initialize session storage to an empty list and redirect user to first question"""
+    session["responses"] = []
+    return redirect("/questions/0")
+
 @app.route("/questions/<idx>")
 def questions(idx):
     """Show survey questions one by one"""
-    if int(idx) != len(responses):
+    if int(idx) != len(session["responses"]):
         flash("Invalid URL entered, redirected to correct URL.")
-        idx = len(responses)
+        idx = len(session["responses"])
     if int(idx) >= len(survey.questions):
         return redirect("/thanks")
     question = survey.questions[int(idx)].question
@@ -32,8 +37,10 @@ def questions(idx):
 @app.route("/answer/<idx>", methods=["POST"])
 def answer(idx):
     """Append the user's answer to the responses list and redirect to the next question"""
+    responses = session["responses"]
     responses.append(request.form[idx])
-    if len(responses) < len(survey.questions):
+    session["responses"] = responses
+    if len(session["responses"]) < len(survey.questions):
         return redirect(f"/questions/{int(idx)+1}")
     return redirect("/thanks")
 
